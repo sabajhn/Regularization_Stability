@@ -1,0 +1,13 @@
+RANDOM_STATE = 42
+
+LAMBDA_VALUES = [
+    0.0001, 0.001, 0.01, 0.1,
+    1, 10, 100, 1000
+]
+
+FIGURE_FOLDER = "figures"
+SAVE_FIGURES = True
+SHOW_FIGURES = True
+
+REAL_DATA_PATH = "data/ENB2012_data.xlsx"
+REAL_TARGET = "Y1"
