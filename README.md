@@ -43,44 +43,44 @@ The core regression models are implemented from scratch using NumPy. The project
 
 Ordinary Least Squares, or OLS, fits a linear model by minimizing the residual sum of squares:
 
-\[
+$$
 \hat{w}_{OLS}
 =
 \arg\min_w
 \|y - Xw\|_2^2
-\]
+$$
 
 OLS does not use any regularization penalty. Because of this, it can achieve very low training error, but it may be sensitive to changes in the training data, especially when the feature matrix is ill-conditioned or when features are correlated.
 
 ### Ridge Regression
 
-Ridge regression adds an \(L_2\) penalty to the OLS objective:
+Ridge regression adds an L2 penalty to the OLS objective:
 
-\[
+$$
 \hat{w}_{Ridge}
 =
 \arg\min_w
 \|y - Xw\|_2^2
 +
 \lambda \|w\|_2^2
-\]
+$$
 
-The parameter \(\lambda\) controls the strength of regularization. When \(\lambda\) is very small, Ridge behaves similarly to OLS. As \(\lambda\) increases, the coefficients are shrunk toward zero. This usually reduces model complexity and can improve stability, but if \(\lambda\) is too large, the model may underfit.
+The parameter `lambda` controls the strength of regularization. When `lambda` is very small, Ridge behaves similarly to OLS. As `lambda` increases, the coefficients are shrunk toward zero. This usually reduces model complexity and can improve stability, but if `lambda` is too large, the model may underfit.
 
 ### Lasso Regression
 
-Lasso regression uses an \(L_1\) penalty instead of an \(L_2\) penalty:
+Lasso regression uses an L1 penalty instead of an L2 penalty:
 
-\[
+$$
 \hat{w}_{Lasso}
 =
 \arg\min_w
 \|y - Xw\|_2^2
 +
 \lambda \|w\|_1
-\]
+$$
 
-The \(L_1\) penalty can shrink some coefficients exactly to zero, which makes Lasso useful for feature selection and sparse models. In this project, Lasso is included as an additional regularized comparison to Ridge.
+The L1 penalty can shrink some coefficients exactly to zero, which makes Lasso useful for feature selection and sparse models. In this project, Lasso is included as an additional regularized comparison to Ridge.
 
 ## Evaluation
 
@@ -92,40 +92,40 @@ The main prediction metrics are:
 
 - Training MSE
 - Test MSE
-- Training \(R^2\)
-- Test \(R^2\)
+- Training R2
+- Test R2
 
 Test MSE is used as the main measure of generalization performance.
 
 ### Model Complexity
 
-Model complexity is measured using the coefficient norm. For Ridge, the coefficient norm decreases gradually as \(\lambda\) increases. For Lasso, the coefficient norm often decreases more sharply because the \(L_1\) penalty can shrink coefficients to zero.
+Model complexity is measured using the coefficient norm. For Ridge, the coefficient norm decreases gradually as `lambda` increases. For Lasso, the coefficient norm often decreases more sharply because the L1 penalty can shrink coefficients to zero.
 
 ### Empirical Stability
 
-Stability is measured using a leave-one-out procedure. For a fixed value of \(\lambda\), the model is first trained on the full training set. Then, one training observation is removed, the model is retrained, and predictions are computed again on the same test set.
+Stability is measured using a leave-one-out procedure. For a fixed value of `lambda`, the model is first trained on the full training set. Then, one training observation is removed, the model is retrained, and predictions are computed again on the same test set.
 
 Two stability measures are computed:
 
-1. **Prediction-based stability**
+#### Prediction-based Stability
 
-\[
+$$
 \frac{1}{n}
 \sum_{i=1}^{n}
 \frac{1}{|T|}
 \sum_{x_t \in T}
 |f(x_t; S) - f(x_t; S \setminus i)|
-\]
+$$
 
 This measures how much the predictions change when one training point is removed.
 
-2. **Loss-based stability**
+#### Loss-based Stability
 
-This compares the squared loss of the full model with the squared loss of the leave-one-out model.
+Loss-based stability compares the squared loss of the full model with the squared loss of the leave-one-out model.
 
 Lower values mean better stability.
 
-# How to Run the Project
+## How to Run the Project
 
 First, install the required Python packages:
 
@@ -138,6 +138,32 @@ Then run the project from the main project folder:
 ```bash
 python main.py
 ```
+
+The script will train OLS, Ridge, and Lasso models, evaluate them on the Diabetes and synthetic datasets, estimate leave-one-out stability, and save the resulting figures.
+
+## Output
+
+The project produces figures such as:
+
+- Training and test error curves
+- Prediction-stability curves
+- Loss-stability curves
+- Stability vs. test error plots
+- Model-complexity plots
+- Dataset-size stability plots
+- Dataset-size test error plots
+
+The figures are saved in the `figures/` folder.
+
+## Main Findings
+
+The experiments show that regularization affects both stability and prediction performance. Ridge and Lasso generally improve empirical stability compared with OLS when moving from very small to moderate values of `lambda`.
+
+However, very large values of `lambda` can shrink the coefficients too strongly and cause underfitting.
+
+The results also show that the most stable model is not always the model with the lowest test error. Good generalization requires a balance between stability, model flexibility, and predictive accuracy.
+
+The dataset-size experiment supports the theoretical idea that stability improves as the number of training observations increases. With more training data, each individual observation has less influence on the fitted model.
 
 The script will train OLS, Ridge, and Lasso models, evaluate them on the Diabetes and synthetic datasets, estimate leave-one-out stability, and save the resulting figures.
 
