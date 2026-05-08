@@ -38,17 +38,13 @@ For the dataset-size experiment, the test set is kept fixed while different numb
 ## Models
 
 The core regression models are implemented from scratch using NumPy. The project does not rely on ready-made machine learning model classes for OLS, Ridge, or Lasso. This makes the implementation more transparent and helps connect the code directly to the mathematical definitions.
-
 ### Ordinary Least Squares
 
 Ordinary Least Squares, or OLS, fits a linear model by minimizing the residual sum of squares:
 
-$$
-\hat{w}_{OLS}
-=
-\arg\min_w
-\|y - Xw\|_2^2
-$$
+```text
+w_hat_OLS = argmin_w ||y - Xw||_2^2
+```
 
 OLS does not use any regularization penalty. Because of this, it can achieve very low training error, but it may be sensitive to changes in the training data, especially when the feature matrix is ill-conditioned or when features are correlated.
 
@@ -56,14 +52,9 @@ OLS does not use any regularization penalty. Because of this, it can achieve ver
 
 Ridge regression adds an L2 penalty to the OLS objective:
 
-$$
-\hat{w}_{Ridge}
-=
-\arg\min_w
-\|y - Xw\|_2^2
-+
-\lambda \|w\|_2^2
-$$
+```text
+w_hat_Ridge = argmin_w ||y - Xw||_2^2 + lambda ||w||_2^2
+```
 
 The parameter `lambda` controls the strength of regularization. When `lambda` is very small, Ridge behaves similarly to OLS. As `lambda` increases, the coefficients are shrunk toward zero. This usually reduces model complexity and can improve stability, but if `lambda` is too large, the model may underfit.
 
@@ -71,18 +62,11 @@ The parameter `lambda` controls the strength of regularization. When `lambda` is
 
 Lasso regression uses an L1 penalty instead of an L2 penalty:
 
-$$
-\hat{w}_{Lasso}
-=
-\arg\min_w
-\|y - Xw\|_2^2
-+
-\lambda \|w\|_1
-$$
+```text
+w_hat_Lasso = argmin_w ||y - Xw||_2^2 + lambda ||w||_1
+```
 
-The L1 penalty can shrink some coefficients exactly to zero, which makes Lasso useful for feature selection and sparse models. In this project, Lasso is included as an additional regularized comparison to Ridge.
-
-## Evaluation
+The L1 penalty can shrink some coefficients exactly to zero, which makes Lasso useful for feature selection and sparse models. In this project, Lasso is included as an additional regularized comparison to Ridge.## Evaluation
 
 The project evaluates each model using several metrics.
 
