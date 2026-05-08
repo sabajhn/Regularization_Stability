@@ -1,4 +1,3 @@
-import os
 import numpy as np
 
 from config import (
@@ -7,12 +6,14 @@ from config import (
     FIGURE_FOLDER,
     SAVE_FIGURES,
     SHOW_FIGURES,
-    REAL_DATA_PATH,
-    REAL_TARGET,
+    RUN_L1_L2_EXTENSION,
+    LASSO_MAX_ITER,
+    LASSO_TOL,
+    COMPUTE_LASSO_STABILITY,
 )
 
-from src.data_utils import load_energy_efficiency_dataset, make_synthetic_regression
-from src.experiments import run_experiment, run_dataset_size_experiment
+from src.data_utils import load_diabetes_dataset, make_synthetic_regression
+from src.experiments import ExperimentRunner
 from src.plotting import Plotter
 
 
@@ -24,28 +25,33 @@ def main():
         save_figures=SAVE_FIGURES,
         show_figures=SHOW_FIGURES
     )
-
-    # -----------------------------------------------------
-    # 1. Real-world regression dataset
-    # -----------------------------------------------------
-    if not os.path.exists(REAL_DATA_PATH):
-        raise FileNotFoundError(
-            f"Could not find the real dataset at: {REAL_DATA_PATH}\n"
-            "Put ENB2012_data.xlsx inside the data/ folder."
-        )
-
-    X_real, y_real = load_energy_efficiency_dataset(
-        REAL_DATA_PATH,
-        target=REAL_TARGET
-    )
-
-    real_results = run_experiment(
-        X_real,
-        y_real,
-        dataset_name="Energy Efficiency Dataset",
+    experiment = ExperimentRunner(
         lambda_values=LAMBDA_VALUES,
         random_state=RANDOM_STATE,
-        plotter=plotter
+        plotter=plotter,
+        run_l1_l2_extension=RUN_L1_L2_EXTENSION,
+        lasso_max_iter=LASSO_MAX_ITER,
+        lasso_tol=LASSO_TOL,
+        compute_lasso_stability=COMPUTE_LASSO_STABILITY
+    )
+
+    # -----------------------------------------------------
+    # 1. Real-world regression dataset: Diabetes
+    # -----------------------------------------------------
+    X_real, y_real, feature_names = load_diabetes_dataset()
+
+    print("Real-world dataset: Diabetes")
+    print(f"Samples: {X_real.shape[0]}")
+    print(f"Features: {X_real.shape[1]}")
+    print("Feature names:", feature_names)
+    print("Target: quantitative disease progression after one year")
+
+    real_results = experiment.run_experiment(
+        X_real,
+        y_real,
+        dataset_name="Diabetes Dataset",
+        feature_names=feature_names,
+        ridge_plot_feature_index=2
     )
 
     # -----------------------------------------------------
@@ -58,13 +64,11 @@ def main():
         random_state=RANDOM_STATE
     )
 
-    synthetic_results = run_experiment(
+    synthetic_results = experiment.run_experiment(
         X_syn,
         y_syn,
         dataset_name="Synthetic Regression Dataset",
-        lambda_values=LAMBDA_VALUES,
-        random_state=RANDOM_STATE,
-        plotter=plotter
+        ridge_plot_feature_index=0
     )
 
     # -----------------------------------------------------
@@ -77,13 +81,13 @@ def main():
         random_state=123
     )
 
-    size_results = run_dataset_size_experiment(
+    size_results = experiment.run_dataset_size_experiment(
         X_size,
         y_size,
         lambda_fixed=1.0,
-        sample_sizes=[60, 100, 150, 220, 300, 400],
-        random_state=RANDOM_STATE,
-        plotter=plotter
+        sample_sizes=[50, 80, 120, 180, 240, 320],
+        n_repeats=10,
+        test_size=0.2
     )
 
     print("\nExperiment completed.")

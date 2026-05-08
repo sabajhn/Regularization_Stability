@@ -1,35 +1,38 @@
 import numpy as np
-import pandas as pd
+from sklearn.datasets import load_diabetes
 
 
-ENERGY_COLUMNS = [
-    "X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "Y1", "Y2"
-]
-
-
-def load_energy_efficiency_dataset(file_path, target="Y1"):
+def load_diabetes_dataset():
     """
-    Load the Energy Efficiency dataset.
+    Load the Diabetes dataset from scikit-learn.
 
-    X1-X8 are the input features.
-    Y1 is Heating Load.
-    Y2 is Cooling Load.
+    This is the real-world regression dataset used in the project.
+    The target is a quantitative measure of disease progression one year
+    after baseline. The input matrix has 10 numeric baseline variables:
+    age, sex, bmi, bp, tc, ldl, hdl, tch, ltg, and glu.
+
+    The original scikit-learn dataset is already mean-centered and scaled,
+    but the project still applies train-only standardization before modeling
+    to keep the preprocessing pipeline consistent for all datasets.
     """
 
-    data = pd.read_excel(file_path)
+    data = load_diabetes()
 
-    if data.shape[1] >= 10:
-        data = data.iloc[:, :10]
-        data.columns = ENERGY_COLUMNS
+    X = data.data.astype(float)
+    y = data.target.astype(float)
 
-    X = data[["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8"]].values
+    feature_names = list(data.feature_names)
+    renamed_features = {
+        "s1": "tc",
+        "s2": "ldl",
+        "s3": "hdl",
+        "s4": "tch",
+        "s5": "ltg",
+        "s6": "glu",
+    }
+    feature_names = [renamed_features.get(name, name) for name in feature_names]
 
-    if target not in ["Y1", "Y2"]:
-        raise ValueError("target must be either 'Y1' or 'Y2'")
-
-    y = data[target].values
-
-    return X, y
+    return X, y, feature_names
 
 
 def make_synthetic_regression(n_samples=250, n_features=20, noise=5.0, random_state=42):
