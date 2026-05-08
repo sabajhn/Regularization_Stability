@@ -42,9 +42,9 @@ The core regression models are implemented from scratch using NumPy. The project
 
 Ordinary Least Squares, or OLS, fits a linear model by minimizing the residual sum of squares:
 
-```text
-w_hat_OLS = argmin_w ||y - Xw||_2^2
-```
+<p>
+ŵ<sub>OLS</sub> = arg min<sub>w</sub> ‖y − Xw‖<sub>2</sub><sup>2</sup>
+</p>
 
 OLS does not use any regularization penalty. Because of this, it can achieve very low training error, but it may be sensitive to changes in the training data, especially when the feature matrix is ill-conditioned or when features are correlated.
 
@@ -52,9 +52,9 @@ OLS does not use any regularization penalty. Because of this, it can achieve ver
 
 Ridge regression adds an L2 penalty to the OLS objective:
 
-```text
-w_hat_Ridge = argmin_w ||y - Xw||_2^2 + lambda ||w||_2^2
-```
+<p>
+ŵ<sub>Ridge</sub> = arg min<sub>w</sub> ‖y − Xw‖<sub>2</sub><sup>2</sup> + λ‖w‖<sub>2</sub><sup>2</sup>
+</p>
 
 The parameter `lambda` controls the strength of regularization. When `lambda` is very small, Ridge behaves similarly to OLS. As `lambda` increases, the coefficients are shrunk toward zero. This usually reduces model complexity and can improve stability, but if `lambda` is too large, the model may underfit.
 
@@ -62,9 +62,9 @@ The parameter `lambda` controls the strength of regularization. When `lambda` is
 
 Lasso regression uses an L1 penalty instead of an L2 penalty:
 
-```text
-w_hat_Lasso = argmin_w ||y - Xw||_2^2 + lambda ||w||_1
-```
+<p>
+ŵ<sub>Lasso</sub> = arg min<sub>w</sub> ‖y − Xw‖<sub>2</sub><sup>2</sup> + λ‖w‖<sub>1</sub>
+</p>
 
 The L1 penalty can shrink some coefficients exactly to zero, which makes Lasso useful for feature selection and sparse models. In this project, Lasso is included as an additional regularized comparison to Ridge.## Evaluation
 
