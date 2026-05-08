@@ -6,22 +6,25 @@ This project studies the relationship between regularization strength, model sta
 
 Two regression datasets are used in this project.
 
+
 ### Diabetes Dataset
 
-The first dataset is the Diabetes dataset from `sklearn.datasets`. It contains 442 observations and 10 numerical input features:
+The first dataset is the Diabetes dataset from `sklearn.datasets`. It contains 442 observations and 10 numerical input features. The target variable is a continuous measure of diabetes disease progression after one year.
 
-- age
-- sex
-- bmi
-- bp
-- tc
-- ldl
-- hdl
-- tch
-- ltg
-- glu
+| Variable | Role | Type | Description |
+|---|---|---|---|
+| age | Feature | Numeric | Age in years |
+| sex | Feature | Numeric | Sex of the patient |
+| bmi | Feature | Numeric | Body mass index |
+| bp | Feature | Numeric | Average blood pressure |
+| tc | Feature | Numeric | Total serum cholesterol |
+| ldl | Feature | Numeric | Low-density lipoproteins |
+| hdl | Feature | Numeric | High-density lipoproteins |
+| tch | Feature | Numeric | Total cholesterol / HDL ratio |
+| ltg | Feature | Numeric | Log serum triglycerides level |
+| glu | Feature | Numeric | Blood sugar level |
+| target | Target | Continuous | Disease progression after one year |
 
-The target variable is a quantitative measure of diabetes disease progression after one year. Since this is a regression task, the goal is to predict a continuous target value rather than a class label.
 
 ### Synthetic Regression Dataset
 
