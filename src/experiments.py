@@ -4,18 +4,18 @@ from models.ols import LinearRegression
 from models.ridge import RidgeRegression
 from models.lasso import LassoRegression
 
-from src.metrics import mean_squared_error_scratch, r2_score_scratch
-from src.preprocessing import train_test_split_scratch, standardize_train_test
-from src.stability import estimate_stability
-from src.printing import print_results_table, print_size_results_table
+from src.metrics import Metrics
+from src.preprocessing import Preprocessor
+from src.stability import StabilityEstimator
+from src.printing import ResultPrinter
 
 
 class ExperimentRunner:
     """
     Runs the main regularization/stability experiments.
 
-    This class keeps the experiment logic together instead of having
-    separate standalone functions.
+    This class keeps the experiment logic together instead of using
+    standalone experiment functions.
     """
 
     def __init__(
@@ -35,6 +35,11 @@ class ExperimentRunner:
         self.lasso_max_iter = lasso_max_iter
         self.lasso_tol = lasso_tol
         self.compute_lasso_stability = compute_lasso_stability
+
+        self.metrics = Metrics()
+        self.preprocessor = Preprocessor()
+        self.stability_estimator = StabilityEstimator()
+        self.printer = ResultPrinter()
 
     def _get_model_coefficients(self, model):
         """Return only feature coefficients, not the intercept."""
@@ -66,10 +71,10 @@ class ExperimentRunner:
         summary = self._coefficient_summary(model)
 
         return {
-            "train_mse": mean_squared_error_scratch(y_train, train_pred),
-            "test_mse": mean_squared_error_scratch(y_test, test_pred),
-            "train_r2": r2_score_scratch(y_train, train_pred),
-            "test_r2": r2_score_scratch(y_test, test_pred),
+            "train_mse": self.metrics.mean_squared_error(y_train, train_pred),
+            "test_mse": self.metrics.mean_squared_error(y_test, test_pred),
+            "train_r2": self.metrics.r2_score(y_train, train_pred),
+            "test_r2": self.metrics.r2_score(y_test, test_pred),
             "coef_l2_norm": summary["coef_l2_norm"],
             "nonzero_coefs": summary["nonzero_coefs"],
         }
@@ -114,7 +119,7 @@ class ExperimentRunner:
             y_test
         )
 
-        ols_pred_stability, ols_loss_stability = estimate_stability(
+        ols_pred_stability, ols_loss_stability = self.stability_estimator.estimate(
             LinearRegression,
             {},
             X_train,
@@ -148,7 +153,7 @@ class ExperimentRunner:
                 y_test
             )
 
-            ridge_pred_stability, ridge_loss_stability = estimate_stability(
+            ridge_pred_stability, ridge_loss_stability = self.stability_estimator.estimate(
                 RidgeRegression,
                 {"l2_penalty": lam},
                 X_train,
@@ -190,7 +195,7 @@ class ExperimentRunner:
             )
 
             if self.compute_lasso_stability:
-                lasso_pred_stability, lasso_loss_stability = estimate_stability(
+                lasso_pred_stability, lasso_loss_stability = self.stability_estimator.estimate(
                     LassoRegression,
                     {
                         "l1_penalty": lam,
@@ -235,14 +240,6 @@ class ExperimentRunner:
         self.plotter.plot_stability_vs_test_error(results, dataset_name)
         self.plotter.plot_model_complexity(results, dataset_name)
 
-        # if ridge_plot_feature_index < X_train.shape[1]:
-        #     if feature_names is not None:
-        #         x_label = f"{feature_names[ridge_plot_feature_index]} standardized"
-        #     else:
-        #         x_label = f"Feature {ridge_plot_feature_index} standardized"
-
-            
-
     def run_experiment(
         self,
         X,
@@ -255,21 +252,20 @@ class ExperimentRunner:
         Run OLS, Ridge, and optional Lasso experiments on one dataset.
 
         The main models use all features.
-        The Ridge demo plot uses only one selected feature because it is a 2D plot.
         """
 
         print("\n" + "=" * 70)
         print(f"Dataset: {dataset_name}")
         print("=" * 70)
 
-        X_train, X_test, y_train, y_test = train_test_split_scratch(
+        X_train, X_test, y_train, y_test = self.preprocessor.train_test_split(
             X,
             y,
             test_size=0.2,
             random_state=self.random_state
         )
 
-        X_train, X_test = standardize_train_test(X_train, X_test)
+        X_train, X_test = self.preprocessor.standardize_train_test(X_train, X_test)
 
         results = []
 
@@ -277,7 +273,7 @@ class ExperimentRunner:
         self._run_ridge(results, dataset_name, X_train, y_train, X_test, y_test)
         self._run_lasso(results, dataset_name, X_train, y_train, X_test, y_test)
 
-        print_results_table(results)
+        self.printer.print_results_table(results)
 
         self._make_standard_plots(
             results,
@@ -312,7 +308,7 @@ class ExperimentRunner:
         print("Dataset size experiment using Ridge Regression")
         print("=" * 70)
 
-        X_train_pool, X_test_fixed, y_train_pool, y_test_fixed = train_test_split_scratch(
+        X_train_pool, X_test_fixed, y_train_pool, y_test_fixed = self.preprocessor.train_test_split(
             X,
             y,
             test_size=test_size,
@@ -345,7 +341,7 @@ class ExperimentRunner:
                 X_train_raw = X_train_pool[chosen_indices]
                 y_train = y_train_pool[chosen_indices]
 
-                X_train, X_test = standardize_train_test(
+                X_train, X_test = self.preprocessor.standardize_train_test(
                     X_train_raw,
                     X_test_fixed
                 )
@@ -361,7 +357,7 @@ class ExperimentRunner:
                     y_test_fixed
                 )
 
-                pred_stability, loss_stability = estimate_stability(
+                pred_stability, loss_stability = self.stability_estimator.estimate(
                     RidgeRegression,
                     {"l2_penalty": lambda_fixed},
                     X_train,
@@ -378,18 +374,15 @@ class ExperimentRunner:
                 "sample_size": sample_size,
                 "train_size": sample_size,
                 "test_size": len(y_test_fixed),
-
                 "test_mse": float(np.mean(mse_values)),
                 "test_mse_std": float(np.std(mse_values)),
-
                 "prediction_change": float(np.mean(pred_stability_values)),
                 "prediction_change_std": float(np.std(pred_stability_values)),
-
                 "loss_change": float(np.mean(loss_stability_values)),
                 "loss_change_std": float(np.std(loss_stability_values)),
             })
 
-        print_size_results_table(results)
+        self.printer.print_size_results_table(results)
 
         if self.plotter is not None:
             self.plotter.plot_dataset_size_effect(results, lambda_fixed)
