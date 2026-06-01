@@ -128,20 +128,6 @@ python main.py
 
 The script will train OLS, Ridge, and Lasso models, evaluate them on the Diabetes and synthetic datasets, estimate leave-one-out stability, and save the resulting figures.
 
-## Output
-
-The project produces figures such as:
-
-- Training and test error curves
-- Prediction-stability curves
-- Loss-stability curves
-- Stability vs. test error plots
-- Model-complexity plots
-- Dataset-size stability plots
-- Dataset-size test error plots
-
-The figures are saved in the `figures/` folder.
-
 ## Main Findings
 
 The experiments show that regularization affects both stability and prediction performance. Ridge and Lasso generally improve empirical stability compared with OLS when moving from very small to moderate values of `lambda`.
@@ -167,13 +153,3 @@ The project produces figures such as:
 - Dataset-size test error plots
 
 The figures are saved in the `figures/` folder.
-
-## Main Findings
-
-The experiments show that regularization affects both stability and prediction performance. Ridge and Lasso generally improve empirical stability compared with OLS when moving from very small to moderate values of `lambda`.
-
-However, very large values of `lambda` can shrink the coefficients too strongly and cause underfitting.
-
-The results also show that the most stable model is not always the model with the lowest test error. Good generalization requires a balance between stability, model flexibility, and predictive accuracy.
-
-The dataset-size experiment supports the theoretical idea that stability improves as the number of training observations increases. With more training data, each individual observation has less influence on the fitted model.
